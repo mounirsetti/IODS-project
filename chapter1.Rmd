@@ -1,7 +1,7 @@
 
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you can use R Markdown syntax.*
+*It's a great project*
 
 With all of these preparations (installing GitHub, connecting it with RStudio, using Datacamp etc.), I feel that this course is going to give me a proper introduction to the main tools of the trade in the fancy world of data science.
 Maybe I have already learned enough today. I will leave getting familiar with R Markdown to another day.
