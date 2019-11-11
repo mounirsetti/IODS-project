@@ -388,7 +388,6 @@ summary {
 <div id="TOC">
 <ul>
 <li><a href="#about-the-project">About the project</a></li>
-<li><a href="#insert-chapter-2-title-here">Insert chapter 2 title here</a></li>
 </ul>
 </div>
 
@@ -398,15 +397,68 @@ summary {
 <p><em>It’s a great project</em></p>
 <p>With all of these preparations (installing GitHub, connecting it with RStudio, using Datacamp etc.), I feel that this course is going to give me a proper introduction to the main tools of the trade in the fancy world of data science. Maybe I have already learned enough today. I will leave getting familiar with R Markdown to another day. Here is a link to my GitHub repository: <a href="https://github.com/mounirsetti/IODS-project" class="uri">https://github.com/mounirsetti/IODS-project</a></p>
 <hr />
-</div>
-<div id="insert-chapter-2-title-here" class="section level1">
-<h1>Insert chapter 2 title here</h1>
-<p><em>Describe the work you have done this week and summarize your learning.</em></p>
-<ul>
-<li>Describe your work and results clearly.</li>
-<li>Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.</li>
-<li>Assume the reader has no previous knowledge of your data or the more advanced methods you are using.</li>
-</ul>
+<p>#Mounir Ould Setti - Linear and Multiple Regression analysis</p>
+<pre><code>#Mounir Ould Setti 11.11.19 - Analysis part of exercise 2
+##1.Importing data and describing it
+students2014 &lt;- read.csv(&quot;http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt&quot;,header=TRUE,sep = &quot;,&quot;)
+str(students2014)
+dim(students2014)
+head(students2014)
+###We have data on 7 variables for 166 students, gender is a factor M/F,
+###age and points are intervals, and attitude, deep, stra, and surf are
+###numerical scales from 1 to 5
+###Points represent the final exam points. Attitude, deep, surface (surf)
+###and strategic (stra) represent the wanna be predictors.
+
+##2.Graphical plotting
+library(GGally)
+library(ggplot2)
+#ignore#
+#p1&lt;-ggplot(students2014, aes(x = attitude, y = points, col=gender))
+#p2&lt;-p1+geom_point()
+#p2
+#,geom_smooth(method = &quot;lm&quot;)
+#,ggtitle(&quot;Student&#39;s attitude versus exam points&quot;))
+#pairs(students2014[-1],col=students2014$gender)
+#end-ignoring#
+ggpairs(students2014, mapping = aes(col=gender, alpha=0.3),
+        lower = list(combo = wrap(&quot;facethist&quot;, bins = 20)))
+summary(students2014)
+##commenting the results
+###It seems that there is a correlation between points and the other measures
+###this correlation is particularly strong with attitude
+###&quot;It&#39;s all about attitude&quot;
+###There are more females than males in the study. And it seems that there is
+###a difference in measures between genders, but no difference in the exam points.
+
+##3. Regression model
+###create a regression model with multiple explanatory variables
+studentsmodel&lt;- lm(points ~ attitude + deep + surf, data = students2014)
+###print out a summary of the model
+summary(studentsmodel)
+
+###comments
+####attitude seems to significantly (p&lt;0.1) increase exam points while
+####deep and surf don&#39;t seem to have enough stat. signif.
+
+###changing parameters
+studentsmodel&lt;- lm(points ~ attitude + age + stra, data = students2014)
+
+##4.Summary of the chosen model
+###print out a summary of the model
+summary(studentsmodel)
+
+####it seems that, along with attitude, age and stra are acceptable predictors
+####of exam points (p-values &lt; 0.1)
+####these 3 variables explain 22% of the model&#39;s variability (multiple R-squared=0.22)
+
+##5.residuals
+par(mfrow = c(2,2))
+plot(studentsmodel, which = c(1,2,5))
+
+###Residuals seem randomly distributed (good)
+###It seems that the model respects the normality assumption.
+###Residuals vs leverage: it doesn&#39;t seem that there&#39;s an outlier biasing the model (good)</code></pre>
 <hr />
 </div>
 
