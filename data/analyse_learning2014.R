@@ -51,3 +51,11 @@ summary(studentsmodel)
 ####it seems that, along with attitude, age and stra are acceptable predictors
 ####of exam points (p-values < 0.1)
 ####these 3 variables explain 22% of the model's variability (multiple R-squared=0.22)
+
+##5.residuals
+par(mfrow = c(2,2))
+plot(studentsmodel, which = c(1,2,5))
+
+###Residuals seem randomly distributed (good)
+###It seems that the model respects the normality assumption.
+###Residuals vs leverage: it doesn't seem that there's an outlier biasing the model (good)
