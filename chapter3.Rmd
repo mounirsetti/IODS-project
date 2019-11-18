@@ -1,0 +1,36 @@
+---
+title: "Chapter 3: Logistic Regression"
+author: "Mounir Ould Setti"
+date: "18/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 2. Exploring the data
+
+Importing the data from the URL
+``` {r}
+alc <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt",sep=",",header = TRUE)
+
+colnames(alc)
+str(alc)
+dim(alc)
+```
+
+The data explores students' performance along with some behavioral parameters such as alochol use. It consists of 382 observations corresponding to the students and 35 variables.
+
+## 3. Hypotheses on the association of alcohol consumption with some other variables
+
+1- Study time (variable 'studytime): I suppose that high alcohol use would be associated with low study times.
+
+2- Class failures (variable 'failures'): I suppose that students who have low alcohol use would be likely not to have class failures.
+
+3- Sex: I suppose that men would be more likely to have high use of alcohol
+
+4- Absences: I suppose that those with high alcohol use have a higher count of absences.
+
+## 4. Exploring the distribution of my chosen variables and their relationships with alcohol consumption
+
