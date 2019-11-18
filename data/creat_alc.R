@@ -2,7 +2,7 @@
 #Data wrangling for exercise 3: Logistic regression
 #Data source: UCI Machine Learning Repository Student Performance Data https://archive.ics.uci.edu/ml/datasets/Student+Performance
 
-#Importing the data
+#3#Importing the data
 mat<-read.csv("data/student-mat.csv", header = TRUE, sep = ";")
 por<-read.csv("data/student-por.csv", header = TRUE, sep = ";")
 
@@ -13,7 +13,7 @@ dim(mat)
 str(por)
 dim(por)
 
-#Joining the two datasets
+#4#Joining the two datasets
 library(dplyr)
 join_by <- c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet")
 
@@ -23,7 +23,7 @@ math_por <- inner_join(mat, por, by = join_by,suffix=c(".math",".por"))
 str(math_por)
 dim(math_por)
 
-#Combining the duplicated answers
+#5#Combining the duplicated answers
 math <- mat
 
 alc <- select(math_por, one_of(join_by))
@@ -54,3 +54,14 @@ for(column_name in notjoined_columns) {
 
 ##Checking that everything is alright
 glimpse(alc)
+
+#6#Creating new columns 'alc_use' and 'high_use'
+##combining weekday and weekend alcohol use -> alc_use
+alc <- mutate(alc, alc_use = (Dalc + Walc) / 2)
+##defining 'high_use' from 'alc_use'
+alc <- mutate(alc, high_use = alc_use > 2)
+
+#7#Checking the data and saving it
+glimpse(alc)
+dim(alc)
+write.csv(alc,"data/alc.csv")
