@@ -387,7 +387,9 @@ summary {
 
 <div id="TOC">
 <ul>
-<li><a href="#about-the-project">About the project</a><ul>
+<li><a href="#about-the-project">About the project</a></li>
+<li><a href="#chapter-2-is-not-appearing-correctly.-forget-about-it---donnie-brasco"><em>Chapter 2 is not appearing correctly. “Forget about it” - Donnie Brasco</em></a></li>
+<li><a href="#chapter-3-logistic-regression">Chapter 3: Logistic Regression</a><ul>
 <li><a href="#exploring-the-data">2. Exploring the data</a></li>
 <li><a href="#hypotheses-on-the-association-of-alcohol-consumption-with-some-other-variables">3. Hypotheses on the association of alcohol consumption with some other variables</a></li>
 <li><a href="#exploring-the-distribution-of-my-chosen-variables-and-their-relationships-with-alcohol-consumption">4. Exploring the distribution of my chosen variables and their relationships with alcohol consumption</a></li>
@@ -480,6 +482,19 @@ plot(studentsmodel, which = c(1,2,5))
 <p>##5.residuals par(mfrow = c(2,2)) plot(studentsmodel, which = c(1,2,5))</p>
 <p>###Residuals seem randomly distributed (good) ###It seems that the model respects the normality assumption. ###Residuals vs leverage: it doesn’t seem that there’s an outlier biasing the model (good) &gt;&gt;&gt;&gt;&gt;&gt;&gt; 57551969939d163ba4edf84eed7d3cedcb8d11f4 ```</p>
 <hr />
+</div>
+<div id="chapter-2-is-not-appearing-correctly.-forget-about-it---donnie-brasco" class="section level1">
+<h1><em>Chapter 2 is not appearing correctly. “Forget about it” - Donnie Brasco</em></h1>
+<hr />
+</div>
+<div id="chapter-3-logistic-regression" class="section level1">
+<h1>Chapter 3: Logistic Regression</h1>
+<div id="mounir-ould-setti" class="section level3">
+<h3>Mounir Ould Setti</h3>
+</div>
+<div id="section" class="section level3">
+<h3>18/11/2019</h3>
+</div>
 <div id="exploring-the-data" class="section level2">
 <h2>2. Exploring the data</h2>
 <p>Importing the data from the URL</p>
@@ -718,7 +733,7 @@ loss_func(class = alc$high_use, prob = alc$probability)</code></pre>
 cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10) #10-folds cv
 # average number of wrong predictions in the cross validation
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2670157</code></pre>
+<pre><code>## [1] 0.2617801</code></pre>
 <p>My model seems to have the same accuracy (74%) as the DataCamp model.</p>
 <hr />
 </div>

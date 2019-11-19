@@ -1,13 +1,11 @@
----
-title: "Chapter 3: Logistic Regression"
-author: "Mounir Ould Setti"
-date: "18/11/2019"
-output: html_document
----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
+
+# Chapter 3: Logistic Regression
+### Mounir Ould Setti
+### 18/11/2019
+
+
 
 ## 2. Exploring the data
 

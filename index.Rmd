@@ -23,6 +23,10 @@ output:
 
 ***
 
+# *Chapter 2 is not appearing correctly. "Forget about it" - Donnie Brasco*
+
+***
+
 ```{r child = "chapter3.Rmd"}
 ```
 
