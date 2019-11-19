@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Importing the data from the URL
 ``` {r}
+library(dplyr)
 alc <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt",sep=",",header = TRUE)
 
 colnames(alc)
@@ -24,13 +25,186 @@ The data explores students' performance along with some behavioral parameters su
 
 ## 3. Hypotheses on the association of alcohol consumption with some other variables
 
-1- Study time (variable 'studytime): I suppose that high alcohol use would be associated with low study times.
+1- Sex: I suppose that men would be more likely to have high use of alcohol
 
-2- Class failures (variable 'failures'): I suppose that students who have low alcohol use would be likely not to have class failures.
+2- Study time (variable 'studytime): I suppose that high alcohol use would be associated with low study times.
 
-3- Sex: I suppose that men would be more likely to have high use of alcohol
+3- Class failures (variable 'failures'): I suppose that students who have high alcohol use would be likely to have a higher number of class failures.
 
 4- Absences: I suppose that those with high alcohol use have a higher count of absences.
 
 ## 4. Exploring the distribution of my chosen variables and their relationships with alcohol consumption
 
+### 1/ Gender and high alcohol use
+
+Exploring the association between gender and high alcohol consumption
+The following chunk will calculate the percentage of high alcohol users among males and females.
+
+``` {R}
+round(prop.table(table(alc$sex,alc$high_use,dnn=c("Gender","High alcohol use"))),2)
+```
+It seems that males tend to have higher percentages of high alcohol usage.
+
+Graphically exploring alcohol usage with gender-based shading:
+
+``` {R}
+library(ggplot2)
+ggplot(alc,aes(x=alc_use,fill=sex)) + geom_bar()
+```
+
+Looking at the barplot, it seems that students are more likely to be light drinkers, and heavy drinking is dominated by men.
+
+### 2/ Study time and high alcohol use
+
+The following chunk will give us a 2x2 table with low study time on the rows and high alcohol usage on the columns.
+
+``` {R}
+round(prop.table(table((alc$studytime==1),alc$high_use,dnn=c("Low study time","High alcohol use"))),2)
+```
+
+It seems that those who have higher than 2 hours a week of study time are less likely to be heavy alcohol users (55% vs 18%).
+However, there are more low alcohol users than heavy ones in those who study less than 2 hours a week.
+
+Plotting weekly study time by heavy alcohol usage
+
+``` {R}
+ggplot(alc,aes(x=studytime,fill=high_use)) + geom_bar()
+```
+
+From the graph, it looks like heavy alcohol users are not likely to study more than 5 hours a week.
+
+### 3/ Class failures and high alcohol use
+
+The following chunk will give us a 2x2 table with no study failures on the rows and high alcohol usage on the columns.
+
+``` {R}
+round(prop.table(table((alc$failures==0),alc$high_use,dnn=c("No study failures","High alcohol use"))),2)
+```
+
+Among those who have some past class failures, there are more low alcohol users than high alcohol users. Therefore, it doesn't seem that there is an association between high alcohol usage and class failures.
+
+
+Plotting class failures by heavy alcohol usage
+
+``` {R}
+ggplot(alc,aes(x=failures,fill=high_use)) + geom_bar()
+```
+
+There does not seem to be a clear pattern of association between high alcohol usage and past class failures.
+
+### 4/ Absences and high alcohol use
+Exploring school absences
+``` {R}
+summary(alc$absences)
+```
+Most students have a number of absences equal or lower than 3 (median = 3).
+Let's see how many heavy drinkers are there in the 50% who have more than 3 absences.
+
+The following chunk will give us a 2x2 table with > 3 absences on the rows and high alcohol usage on the columns.
+
+``` {R}
+round(prop.table(table((alc$absences>3),alc$high_use,dnn=c("More than 3 absences","High alcohol use"))),2)
+```
+It seems that most people with less or equal than 3 absences are not heavy alcohol users (40% vs 10%).
+
+
+Plotting the number of absences by heavy alcohol usage
+
+``` {R}
+ggplot(alc,aes(x=absences,y=alc_use)) + geom_smooth()
+```
+
+The graph suggests that the number of absences increases with the increase of alcohol usage in the beginning but the pattern doesn't continue with a high level of absences.
+
+> Well, things are not always as they seem to be. Statistics tend to provide a better view on the truth than prejudices and intuitions (although human intuitions are somehow based on a sort of a machine-learning/statistics system of modeling).
+
+## 5. Using logistic regression to statistically explore the association of my chosen variables with high alcohol consumption
+
+Fitting the logistic regression model and showing its summary
+
+``` {R}
+glm(high_use ~ sex + studytime + failures + absences, data = alc, family = "binomial") %>% summary()
+```
+
+Interpretting the summary
+
+All of the factors included were found to significantly predict heavy alcohol consumption (p<0.05).
+We need to transform the summary's log estimates into odds ratios to allow proper interpretation.
+The following chunk will convert log into odds ratios through (exp) and show them with confidence intervals
+
+``` {R}
+glm(high_use ~ sex + studytime + failures + absences, data = alc, family = "binomial") %>% coef() %>% exp() -> OR
+cbind(OR, exp(confint(glm(high_use ~ sex + studytime + failures + absences, data = alc, family = "binomial"))))
+```
+Interpreting the odds ratios
+1- Men are more than two folds more likely to be heavy drinkers than females (OR = 2.27)
+2- The more study hours a student spend a week, the less likely they are to be heavy drinkers (each unit of study time reduces the risk of being a heavy drinker by 31% (OR = 0.69))
+3- Students who have past classes failures are more likely to be heavy drinkers (each failed class would increase the risk of being a heavy drinker by 39%) (OR = 1.39)
+4- School absences increase the risk of heavy drinking (each unit increases the risk by 7% (OR=1.07))
+
+> It seems that all of my initial hypotheses were true! I told you that intuition is somehow based on statistics :)
+
+## 6. Checking the accuracy of the model's prediction
+``` {R}
+m<-glm(high_use ~ sex + studytime + failures + absences, data = alc, family = "binomial")
+# predict() the probability of high_use
+probabilities <- predict(m, type = "response")
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability>0.5)
+# tabulate the predictions vs the target variable 
+table(prediction = alc$prediction, high_use = alc$high_use)%>% prop.table(margin = 1) %>% addmargins()
+```
+
+I generated a code different than that of datacamp using proportions across rows rather than general proportions as to show the probability of false prediction in each case.
+If we treat our model's prediction as a screening test, we will have:
+
+True negatives = 75% (Negative predictive value/power)
+
+True positives = 68% (Positive predictive value/power)
+
+False positives = 32% (training error)
+
+False negatives = 25% (training error)
+
+In clinical language, this means:
+
+The sensitivity of the test = `r 0.6829268/0.9292611`
+
+The specificity of the test = `r 0.7536657/1.0707389`
+
+> These values, in my humble opinion, provide more information than a single number of average wrong predictions (or true ones) because, generally, some tests might be better at predicting the presence of a disease while others are better at predicting its absence.
+
+``` {R}
+#Plotting 'high_use' versus 'probability' in 'alc'
+ggplot(alc, aes(x = probability, y = high_use,col=prediction))+geom_point()
+```
+
+> The model has 68% chance of getting it right when predicting that a student is a heavy drinker. That's much better than any simple guessing strategy ... I guess
+
+### Trying the loss function
+
+``` {R}
+# define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = alc$high_use, prob = alc$probability)
+
+```
+
+The average number of wrong predictions in the data using our model is 25%
+
+## 7. 10-fold cross validation
+
+``` {R}
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10) #10-folds cv
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+My model seems to have the same accuracy (74%) as the DataCamp model.
