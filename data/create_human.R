@@ -11,6 +11,10 @@ dim(hd)
 str(gii)
 dim(gii)
 
+### human development (hd) dataset has 195 observations of 8 variables, of which 2 are character variables (country and Gross National Income),
+### 2 are integer variables ( rank HDI, and rank GNI minus rank HDI) and the rest numeric (HDI, life expectancy at birth, expected years of 
+### education, mean years of education).
+
 summary(hd)
 summary(gii)
 
