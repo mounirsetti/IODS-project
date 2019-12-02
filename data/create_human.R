@@ -1,6 +1,28 @@
 #Mounir Ould Setti 02.12.2019 Chapter 5: Dimensionality reduction techniques
 
+<<<<<<< HEAD
 library(tidyr)
+=======
+##2.Importing the data
+hd <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv", stringsAsFactors = F)
+gii <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/gender_inequality.csv", stringsAsFactors = F, na.strings = "..")
+
+##3.Exploring the dataset
+str(hd)
+dim(hd)
+
+str(gii)
+dim(gii)
+
+### human development (hd) dataset has 195 observations of 8 variables, of which 2 are character variables (country and Gross National Income),
+### 2 are integer variables ( rank HDI, and rank GNI minus rank HDI) and the rest numeric (HDI, life expectancy at birth, expected years of 
+### education, mean years of education).
+
+summary(hd)
+summary(gii)
+
+##4.Renaming the variables
+>>>>>>> 943be0bd4d7721fe9a73ca04ae9e696c4ebe76e7
 library(dplyr)
 library(stringr)
 library(corrplot)
