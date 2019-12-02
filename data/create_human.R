@@ -1,46 +1,39 @@
-#Mounir Ould Setti 25.11.2019 Chapter 4: Clustering and classification
+#Mounir Ould Setti 02.12.2019 Chapter 5: Dimensionality reduction techniques
 
-##2.Importing the data
-hd <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv", stringsAsFactors = F)
-gii <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/gender_inequality.csv", stringsAsFactors = F, na.strings = "..")
-
-##3.Exploring the dataset
-str(hd)
-dim(hd)
-
-str(gii)
-dim(gii)
-
-summary(hd)
-summary(gii)
-
-##4.Renaming the variables
+library(tidyr)
 library(dplyr)
-colnames(hd)[1] <- "rank.hd"
-colnames(hd)[2] <- "country"
-colnames(hd)[3] <- "HDI"
-colnames(hd)[4] <- "lifexp"
-colnames(hd)[5] <- "expecteduc"
-colnames(hd)[6] <- "meaneduc"
-colnames(hd)[7] <- "GNIcapita"
-colnames(hd)[8] <- "GNIrank"
+library(stringr)
+library(corrplot)
+library(GGally)
+library(ggplot2)
 
-colnames(gii)[1] <- "rank.gii"
-colnames(gii)[2] <- "country"
-colnames(gii)[3] <- "GII"
-colnames(gii)[4] <- "MMR"
-colnames(gii)[5] <- "ABR"
-colnames(gii)[6] <- "PRP"
-colnames(gii)[7] <- "PSE.F"
-colnames(gii)[8] <- "PSE.M"
-colnames(gii)[9] <- "LFPR.F"
-colnames(gii)[10] <- "LFPR.M"
+#0- Loading and exploring 'human' dataset
+human<-read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt",header=TRUE,sep=",")
 
-##5.Working the GII data (creating two new ratio variables)
-gii <- mutate(gii, PSE.R = (PSE.F/PSE.M))
-gii <- mutate(gii, LFPR.R = (LFPR.F/LFPR.M))
+str(human)
+summary(human)
+dim(human)
+gather(human) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+##The data is composed of 195 observations and 19 variables.
+##Beside HDI.rank, and country, all the factors are numeric.
+##Data has some outliers and NA values.
+##Data contains measures of factors contributing in the constitution of the
+##Human Development Index and the Gender Inequality Index in the United Nations 195 countries.
+##More information on the data can be found here http://hdr.undp.org/en/content/human-development-index-hdi
 
-##6. Joining HDI dataset with GII dataset and saving it
-human <- inner_join(hd, gii)
-###head(human)
+#1- Transforming GNI to numeric
+str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric -> human$GNI
+
+#2- Exluding unneeded variables
+human <- select(human, one_of(c("Country", "Edu2.FM", "Labo.FM", "Life.Exp", "Edu.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F")))
+
+#3- Remove all rows with missing values
+human <- filter(human, complete.cases(human)==TRUE)
+
+#4- Remove observations relating to regions instead of countries (the 7 last observations)
+human <- human[1:(nrow(human) - 7), ]
+
+#5- Defining row names by country names and saving the data
+rownames(human) <- human$Country
+human <- select(human, -Country)
 write.csv(human,"data/human.csv")

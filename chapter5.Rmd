@@ -1,0 +1,112 @@
+
+
+
+# Chapter 5: Dimensionality reduction techniques
+Mounir Ould Setti
+02/12/2019
+
+## 0. Loading the libraries and importing the data
+```{r}
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(corrplot)
+library(GGally)
+library(ggplot2)
+```
+
+```{r}
+human<-read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt",header=TRUE,sep=",")
+
+```
+
+## 1. Graphical overview of the data, summaries, and distribution
+Visualizing the 'human' variables
+```{r}
+ggpairs(human)
+```
+Edu2.FM and Edu.Exp have more or less a normal distribution
+Labo.FM and Life.Exp are left skewed while GNI, Mat.Mor, Ado.Birth, and Parli.F are right skewed.
+
+Computing the correlation matrix and visualizing it with corrplot
+```{r}
+cor(human)%>%corrplot
+```
+
+There is a strong positive and negative correlation between some variables as the plot shows. For example, Life expectancy has a strong negative correlation with maternal mortality.
+
+## 2. PCA on nonstandardized human data
+### Variability of the principal components of nonstandardized human data
+```{r}
+pca_human <- prcomp(human)
+# rounded percetanges of variance captured by each PC
+pca_pr <- round(100*(summary(pca_human))$importance[2, ], digits = 1)
+# print out the percentages of variance
+pca_pr
+```
+### Biplot of the two principal components of nonstandardized human data
+```{r}
+# create object pc_lab to be used as axis labels
+pc_lab<-paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+
+
+## 3. PCA on standardized human data
+```{r}
+human <- scale(human)
+pca_human <- prcomp(human)
+# rounded percetanges of variance captured by each PC
+pca_pr <- round(100*(summary(pca_human))$importance[2, ], digits = 1)
+# print out the percentages of variance
+pca_pr
+
+# create object pc_lab to be used as axis labels
+pc_lab<-paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+
+The biplots are very different indeed. With unstandardized data, GNI dominates the other variables and the first principal component takes all the variance. The principal components with standardized data are more able to catch the variance in the variables now that the units are equivalent and the distributions are comparable. As a consequence, the first principal component ended up accounting for a reasonable amount of variability (53.6%). The variables Parli.F and Labo.FM take the most from PC2 which accounts for 16% of the data variability while the other variables take more from PC1.
+
+## 4- Interpreting the results
+
+The first principal component seems to be related to factors contributing to the calulation of the Human Development Index
+while the second component seems to be related to factors contributing to the calculation of Gender Inequality Index.
+
+Redrawing the plot with personal caption
+```{r}
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = "Human Development Index (53.6%)", ylab = "Gender Inequality Index (16.2%)")
+```
+
+## 5- The tea dataset
+
+### Exploring and visualizing the dataset
+
+```{r}
+library(FactoMineR)
+data("tea")
+summary(tea)
+str(tea)
+
+# visualize the dataset
+gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free")+ geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+```
+
+### Doing an MCA to certain columns of the data
+```{r}
+data("tea")
+tea_time <- dplyr::select(tea, one_of(c("Tea", "How", "how", "sugar", "where", "lunch")))
+# multiple correspondence analysis
+mca <- MCA(tea_time,graph = FALSE)
+# summary of the model
+summary(mca)
+# visualize MCA
+plot(mca, invisible=c("ind"),habillage = "quali")
+```
+
+Dimension 1 accounts for 15% of the variability in the data and Dimension 2 accounts for 14%.
