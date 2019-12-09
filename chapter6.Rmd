@@ -1,0 +1,83 @@
+
+
+
+# Chapter 6: Analysis of longitudinal data
+Mounir Ould Setti
+09/12/2019
+
+## I - RATS data (Chapter 8 of MABS)
+
+### 1. Loading the libraries, importing the RATSL dataset, and summary of the data
+```{r eval=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+```
+
+```{r}
+RATSL<- read.table("data/RATSL.csv", header = TRUE, sep = ',')
+RATSL$X <- NULL
+RATSL$ID <- as.factor(RATSL$ID)
+RATSL$Group <- as.factor(RATSL$Group)
+```
+
+
+
+```{r}
+glimpse(RATSL)
+summary(RATSL)
+str(RATSL)
+
+```
+
+We have taken the time on the wrangling phase of this exercise to turn the RATS dataset into a longitudinal form.
+
+The long dataset form has more rows and less columns. A subject can have many rows represeting their observations at different time points which are indicated in the time column.
+
+The study design associated to the dataset seems that it assigned the rats into three (intervention) groups and then observations of weight have been recorded on each rat at different time points.
+
+### 2. Graphical representation of the data
+
+``` {r}
+ggplot(RATSL, aes(x = Time, y = Weight, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(RATSL$Weight), max(RATSL$Weight)))
+
+```
+Figure 1. Individual response profiles by group for the RATS data
+
+It seems that rats in the three groups gain weight with time but the groups 2 and 3 seem to gain weight more markedly. However, the difference between the groups might possibly be due to the differences at baseline.
+Standardization might help fix this issue.
+
+Standardizing the variable Weight
+
+``` {r}
+RATSL <- RATSL %>%
+  group_by(Time) %>%
+  mutate(stdWeight = ((Weight-mean(Weight))/sd(Weight))) %>%
+  ungroup()
+#Glimpse the data
+glimpse(RATSL)
+
+```
+
+
+Ploting again with the standardised weights
+
+``` {r}
+ggplot(RATSL, aes(x = Time, y = stdWeight, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +  theme(legend.position = "none") +
+  scale_y_continuous(name = "standardized weight")
+```
+
+
+
+
+
+## II - BPRS dataset (Chapter 9 of MABS)
