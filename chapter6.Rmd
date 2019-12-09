@@ -120,25 +120,56 @@ We notice that the three groups have distinctive weights development over time. 
 
 Creating a summary data by group and rat with mean as the summary variable (ignoring baseline time 1) and plotting it:
 
-``` {r}
-
-RATS8S <- RATSL %>%
-  filter(Time > 1) %>%
-  group_by(Group, ID) %>%
-  summarise( mean=mean(Weight) ) %>%
-  ungroup()
-
-# Glimpse the data
-glimpse(RATS8S)
-
-# Draw a boxplot of the mean versus treatment
-ggplot(RATS8S, aes(x = Group, y = mean)) +
-  geom_boxplot() +
-  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
-  scale_y_continuous(name = "mean(Weight), Time excluding baseline")
+```{r}
+boxplot(mean~Time,data=RATSS,main="Rats weights data",xlab="Time",ylab="Mean weights")
 
 ```
 
+Figure 4. Boxplots for the times ofthe RATS data.
+
+Applying a summary measure approach might help.
+
+From figure 3 and the boxplot on figure 4, it looks like our data is of type Growth (Table 8.2 of MABS) where the eventual value of outcome is different between groups. The recommended summary measure approach is to use the percentage of change between first and last values.
+
+As first values I will use the first quartile, and as last values, I will use the 3rd quartile.
+
+As percentage of change between the lasts and the firsts, I will use the mean of the first quartile and the mean of the last quartile.
+
+
+
+``` {r}
+# Create a summary data by treatment and subject with percentage of change between first and last values as the summary variable
+RATSS2 <- RATSL %>%
+  group_by(Group, ID) %>%
+  summarise( diffperc= ((mean(Weight[Time>49]) /
+                            mean(Weight[Time<16])
+                            )-1)*100 ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSS2)
+
+# Draw a boxplot of the percentage of difference versus group
+ggplot(RATSS2, aes(x = Group, y = diffperc)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "Percentage of difference, Time")
+
+```
+
+It seems that group 2 has the highest gain in weight with about 12% weight gain between the weight in the first quartile of time and the weight at the third quartile of time (percentage of difference between baseline and end-measures).
+However, the confidence intervals overlap, suggesting that differences between groups might not be statistically significant.
+
+A statistical test might help evaluating the differences between groups.
+
+A one way analysis of variances might be of help to test for differences between three groups.
+
+``` {r}
+summary(aov(diffperc ~ Group, data = RATSS2))
+
+```
+
+It seems that, indeed, the groups do not differ significantly in terms of weight gain over time.
 
 
 ## II - BPRS dataset (Chapter 9 of MABS)
