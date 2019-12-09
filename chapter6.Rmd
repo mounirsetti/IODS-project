@@ -48,7 +48,8 @@ ggplot(RATSL, aes(x = Time, y = Weight, linetype = ID)) +
   scale_y_continuous(limits = c(min(RATSL$Weight), max(RATSL$Weight)))
 
 ```
-Figure 1. Individual response profiles by group for the RATS data
+
+Figure 1. Individual rats weight development by group for the RATS data
 
 It seems that rats in the three groups gain weight with time but the groups 2 and 3 seem to gain weight more markedly. However, the difference between the groups might possibly be due to the differences at baseline.
 Standardization might help fix this issue.
@@ -66,7 +67,7 @@ glimpse(RATSL)
 ```
 
 
-Ploting again with the standardised weights
+Ploting again with the standardized weights
 
 ``` {r}
 ggplot(RATSL, aes(x = Time, y = stdWeight, linetype = ID)) +
@@ -76,7 +77,67 @@ ggplot(RATSL, aes(x = Time, y = stdWeight, linetype = ID)) +
   scale_y_continuous(name = "standardized weight")
 ```
 
+Figure 2. Individual rats weight development by group for the RATS data after standardization
 
+We notice a decline in weight development over time in the three groups.
+
+### 3. Summary measure analysis
+It could be helpful in representing the data to summarize observations into their mean accompanied by standard error.
+
+Summarizing the data
+
+``` {r}
+# Time, baseline included
+n <- RATSL$Time %>% unique() %>% length()
+
+# Summary data with mean and standard error of RATSL by Group and Time 
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(Weight), se = sd(Weight)/sqrt(n) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSS)
+
+```
+
+Plotting the mean weights
+
+``` {r}
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = c(0.8,0.5)) +
+  scale_y_continuous(name = "mean(Weight) +/- se(Weight)")
+```
+
+Figure 3. Mean weights for the three groups in the RATS data
+
+We notice that the three groups have distinctive weights development over time. Their confidence intervals do not overlap. 
+
+Creating a summary data by group and rat with mean as the summary variable (ignoring baseline time 1) and plotting it:
+
+``` {r}
+
+RATS8S <- RATSL %>%
+  filter(Time > 1) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATS8S)
+
+# Draw a boxplot of the mean versus treatment
+ggplot(RATS8S, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(Weight), Time excluding baseline")
+
+```
 
 
 
