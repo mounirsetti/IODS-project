@@ -8,7 +8,7 @@ Mounir Ould Setti
 ## I - RATS data (Chapter 8 of MABS)
 
 ### 1. Loading the libraries, importing the RATSL dataset, and summary of the data
-```{r eval=FALSE}
+```{r}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -31,7 +31,7 @@ str(RATSL)
 
 ```
 
-We have taken the time on the wrangling phase of this exercise to turn the RATS dataset into a longitudinal form.
+We have taken the time on the wrangling phase of this assignment to turn the RATS dataset into a longitudinal form.
 
 The long dataset form has more rows and less columns. A subject can have many rows represeting their observations at different time points which are indicated in the time column.
 
@@ -169,7 +169,136 @@ summary(aov(diffperc ~ Group, data = RATSS2))
 
 ```
 
-It seems that, indeed, the groups do not differ significantly in terms of weight gain over time.
+It seems that, indeed, the groups do not differ significantly in terms of weight gain over time. (p-value = 0.126)
+
+There is no need for incorporating baseline measurements as they are integrated in the calculation of the summary measure that we have chosen.
+
+There are also no missing values to deal with.
+
+## II - BPRS dataset (Chapter 9 of MABS) (Linear mixed effects models for repeated measures data)
+
+### 1. Importing the dataset BPRS
+
+```{r}
+BPRSL<- read.table("data/BPRSL.csv", header = TRUE, sep = ',')
+BPRSL$X <- NULL
+BPRSL$subject <- as.factor(BPRSL$subject)
+BPRSL$treatment <- as.factor(BPRSL$treatment)
+
+glimpse(BPRSL)
+summary(BPRSL)
+str(BPRSL)
+```
+
+The study design associated to the dataset seems that it assigned subjects  into two (intervention) groups and then observations of bprs have been recorded on each subject at different weeks (from baseline week 0 to week 8 = 9 time points).
+
+### 2. Plotting the data
+
+``` {r}
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
+
+```
+
+### 3. Fitting Linear Mixed Models to the BPRS Data
+
+Results from fitting a linear regression model to BPRS data with bprs as a response variable, and treatment group and week as explanatory variable while ignoring the repeated-measures nature of the data are as follow:
+
+``` {r}
+BPRS_reg <- lm(bprs~week + treatment, BPRSL)
+summary(BPRS_reg)
+```
+
+It seems that there is no difference between groups in bprs but time (week) has a significant effect on bprs.
 
 
-## II - BPRS dataset (Chapter 9 of MABS)
+### 4. Fitting a model with random intercept
+``` {r}
+
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref)
+
+```
+
+The random intercept model allows the fit to differ in intercepts. 
+The results show that there is a lot of variability between subjects in their intercept.
+
+
+### 5. Fitting the model with a random intercept and random slope 
+
+``` {r}
+BPRS_ref1 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+
+# print a summary of the model
+summary(BPRS_ref1)
+
+```
+
+This model allows variation in slope.
+The results show little variability between weeks but high variability between subjects and with the intercept.
+
+Comparing the two models (random intercept and random intercept + random slope):
+
+``` {r}
+# perform an ANOVA test on the two models
+anova(BPRS_ref1, BPRS_ref)
+
+```
+
+The results of the chisquare test indicate that the two previous models differ significantly. 
+
+### 6. Adding interactions to the previous model
+
+``` {r}
+BPRS_ref2 <- lmer(bprs ~ week * treatment + (week | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref2)
+anova(BPRS_ref2, BPRS_ref1)
+```
+
+The ANOVA test on BPRS_ref1 and BPRS_ref2 shows that there is no statistically significant difference between the two models suggesting that including interactions is not adding much to the fit of the model. But we will still keep it.
+
+### 7. Plotting BPRSL and the fitted values of BPRSL regression model
+
+Original values plot
+
+``` {r}
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + stat_smooth(aes(group = 1),method='loess') + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
+
+```
+
+
+Fitted values plot:
+
+``` {r}
+# Create a vector of the fitted values
+Fitted <- fitted(BPRS_ref2)
+
+# Create a new column fitted to BPRSL
+BPRSL$Fitted <- Fitted
+
+# draw the plot of BPRSL with the Fitted values of weight
+
+ggplot(BPRSL, aes(x = week, y = Fitted, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + stat_smooth(aes(group = 1),method='loess') + 
+  scale_y_continuous(limits = c(min(BPRSL$Fitted), max(BPRSL$Fitted)))
+
+
+
+```
+
+
+The plot with the fitted values of bprs is easier to interpret. It is somehow noticeable that there is no difference between the treatment groups in term of development of BPRS over time.
+
+
