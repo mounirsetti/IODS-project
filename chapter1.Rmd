@@ -1,8 +1,9 @@
 
 # About the project
 
-*It's a great project*
+This is meant as a testing interface to showcase some of the work I am doing for the PhD course: Open Data Science.
 
-With all of these preparations (installing GitHub, connecting it with RStudio, using Datacamp etc.), I feel that this course is going to give me a proper introduction to the main tools of the trade in the fancy world of data science.
-Maybe I have already learned enough today. I will leave getting familiar with R Markdown to another day.
-Here is a link to my GitHub repository: https://github.com/mounirsetti/IODS-project
+Analysis and graphs are generated using R-Programming language.
+Work is compiled and presented using R Markdown.
+
+Here is the repository of the files used for this project: https://github.com/mounirsetti/IODS-project

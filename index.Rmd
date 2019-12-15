@@ -1,5 +1,5 @@
 ---
-title: "IODS course project"
+title: "Open Data Science course project"
 author: "Mounir Ould Setti"
 output:
   html_document:
@@ -16,11 +16,6 @@ output:
 ```{r child = "chapter1.Rmd"}
 ```
   
-***
-  
-```{r child = "chapter2.Rmd"}
-```
-
 ***
 
 # *Chapter 2 is not appearing correctly. "Forget about it" - Donnie Brasco*
